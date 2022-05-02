@@ -1,18 +1,26 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
+import { genres } from "../../defaults";
 import { ScenarioPart } from "../../models";
+import { getRandomItem } from "../../utils";
 
 interface Props {
 	users: string[];
 	addScenario: (str: string, user: string) => void;
 	scenario: ScenarioPart[];
+	genre: string;
+	updateGenre: (newGenre: string) => void;
 }
 
 const Input = (props: Props) => {
-	const { users, addScenario, scenario } = props;
+	const { users, addScenario, scenario, genre, updateGenre } = props;
 	const [input, setInput] = useState("");
 	const [done, setDone] = useState(false);
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [currentUser, setCurrentUser] = useState("");
+
+	useEffect(() => {
+		updateGenre(getRandomItem(genres));
+	}, []);
 
 	useEffect(() => {
 		users.length && setCurrentUser(users[0]);
@@ -23,10 +31,14 @@ const Input = (props: Props) => {
 
 	const onDone = () => {
 		setDone(true);
-		input.length && addScenario(input, currentUser);
+		if (input.length) {
+			addScenario(input, currentUser);
+			setInput("");
+		}
 	};
 
-	const finalize = () => {
+	const finalize = (e: MouseEvent) => {
+		e.stopPropagation();
 		if (currentIndex + 1 === users.length) {
 			setCurrentIndex(0);
 			setCurrentUser(users[0]);
@@ -38,64 +50,92 @@ const Input = (props: Props) => {
 	};
 
 	return (
-		<div className="users">
-			{!done ? (
-				<div>
-					<div className="scenario text">
+		<>
+			<div className="genre shadow">Ваш жанр: {genre}</div>
+			<div className="users">
+				{!done ? (
+					<div>
+						<div className="scenario text">
+							<div
+								style={{
+									display: "flex",
+									whiteSpace: "pre-wrap",
+									marginBottom: 25,
+								}}
+							>
+								Очередь игрока{" "}
+								<div
+									style={{
+										fontSize: 18,
+										marginTop: -2,
+									}}
+									className="shadow"
+								>
+									{currentUser}
+								</div>
+							</div>
+							{scenario.length ? (
+								<div
+									style={{
+										marginBottom: 20,
+										whiteSpace: "pre-wrap",
+									}}
+								>
+									Предыдущий игрок ({" "}
+									{scenario[scenario.length - 1].user} )
+									написал:
+									<div
+										style={{
+											height: 10,
+										}}
+									/>
+									<div
+										style={{
+											maxHeight: 400,
+											overflowY: "scroll",
+										}}
+									>
+										{scenario[scenario.length - 1].str}
+									</div>
+								</div>
+							) : (
+								<div style={{ marginBottom: 20 }}>
+									Вы первый!
+								</div>
+							)}
+						</div>
 						<div
 							style={{
 								display: "flex",
-								whiteSpace: "pre-wrap",
-								marginBottom: 25,
+								alignItems: "flex-start",
 							}}
 						>
-							Очередь игрока{" "}
-							<div
-								style={{
-									fontSize: 18,
-									textShadow: "1px 1px 2px #ddd",
-									marginTop: -2,
-								}}
+							<textarea
+								value={input}
+								onChange={onChange}
+								className="input textArea"
+								rows={5}
+							/>
+							<button
+								onClick={onDone}
+								className="button submitTextGrad"
 							>
-								{currentUser}
-							</div>
+								Готово
+							</button>
 						</div>
-						{scenario.length ? (
-							<div
-								style={{
-									marginBottom: 20,
-									whiteSpace: "pre-wrap",
-								}}
-							>
-								Предыдущий игрок ({" "}
-								{scenario[scenario.length - 1].user} ) написал:
-								<div style={{ height: 10 }} />
-								<div>{scenario[scenario.length - 1].str}</div>
-							</div>
-						) : (
-							<div style={{ marginBottom: 20 }}>Вы первый!</div>
-						)}
 					</div>
-					<div style={{ display: "flex", alignItems: "flex-start" }}>
-						<textarea
-							onChange={onChange}
-							className="input textArea"
-							rows={5}
-						/>
+				) : (
+					<div style={{ display: "flex", justifyContent: "center" }}>
 						<button
-							onClick={onDone}
+							onClick={finalize}
 							className="button submitTextGrad"
 						>
-							Готово
+							Следующий
 						</button>
 					</div>
-				</div>
-			) : (
-				<button onClick={finalize} className="button submitTextGrad">
-					Следующий
-				</button>
-			)}
-		</div>
+				)}
+			</div>
+		</>
 	);
 };
 

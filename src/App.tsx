@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import Input from "./components/input";
 import Scenario from "./components/scenario";
 import Users from "./components/users";
 import { funnyImageURL } from "./defaults";
+import { useSyncStorage } from "./hooks";
 import { ScenarioPart } from "./models";
 
 const pages = ["users", "input", "result"];
@@ -12,6 +13,9 @@ function App() {
 	const [users, setUsers] = useState<string[]>([]);
 	const [scenario, setScenario] = useState<ScenarioPart[]>([]);
 	const [page, setPage] = useState(pages[0]);
+	const [genre, setGenre] = useState("");
+
+	useSyncStorage("users", users, setUsers);
 
 	const addUser = (user: string) => setUsers([...users, user]);
 	const deleteUser = (user: string) =>
@@ -27,10 +31,9 @@ function App() {
 		}
 	};
 
-	console.log(page);
-
 	const addString = (str: string, user: string) =>
 		setScenario([...scenario, { str, user }]);
+	const updateGenre = (newGenre: string) => setGenre(newGenre);
 
 	const isDisabled = !(users.length > 1);
 
@@ -50,9 +53,13 @@ function App() {
 						users={users}
 						addScenario={addString}
 						scenario={scenario}
+						genre={genre}
+						updateGenre={updateGenre}
 					/>
 				)}
-				{page === "result" && <Scenario scenario={scenario} />}
+				{page === "result" && (
+					<Scenario scenario={scenario} genre={genre} />
+				)}
 			</div>
 			<button
 				className="button submitGrad"
@@ -61,7 +68,7 @@ function App() {
 			>
 				{page === "users" && "Начать новую игру"}
 				{page === "input" && "Закончить"}
-				{page === "result" && "Двльше"}
+				{page === "result" && "Дальше"}
 			</button>
 			<div className="imgCont">
 				<img src={funnyImageURL} alt="funnyImage" className="img" />

@@ -28,6 +28,8 @@ const Users = (props: Props) => {
 	const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) =>
 		e.code === "Enter" && onAdd();
 
+	const isDisable = input.length < 3;
+
 	return (
 		<div className="users">
 			<h3 className="text">Добавить игрока</h3>
@@ -43,7 +45,7 @@ const Users = (props: Props) => {
 				))}
 			</div>
 			{users.length > 1 && (
-				<div className="button" onClick={shuffleUsers}>
+				<div className="button marginBottomTen" onClick={shuffleUsers}>
 					Перемешать
 				</div>
 			)}
@@ -54,7 +56,11 @@ const Users = (props: Props) => {
 					className="input"
 					onKeyDown={onKeyDown}
 				/>
-				<button onClick={onAdd} className="button submitTextGrad">
+				<button
+					onClick={onAdd}
+					className="button submitTextGrad"
+					disabled={isDisable}
+				>
 					Добавить
 				</button>
 			</div>
